@@ -18,5 +18,6 @@ class HomeController extends AbstractController
             'version' => \Symfony\Component\HttpKernel\Kernel::VERSION,
             'environment' => $this->getParameter('kernel.environment'),
             'debug' => $this->getParameter('kernel.debug'),
-        ]);    }
+        ]);
+    }
 }
