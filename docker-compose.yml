@@ -1,0 +1,75 @@
+services:
+  nginx-unit:
+    container_name: symfony-nginx-unit
+    build: ./containers/local/nginx_unit
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www/symfony
+      - ./containers/local/nginx_unit/config/config.json:/docker-entrypoint.d/config.json
+      - ./containers/local/nginx_unit/supervisor/jobs/:/etc/supervisor/supervisord.d
+    depends_on:
+      - pgsql
+      - redis
+      - rabbitmq
+    networks:
+      symfony:
+        ipv4_address: 192.168.219.13
+
+  redis:
+    container_name: symfony-redis
+    image: redis:7.4-alpine3.20
+    environment:
+      ALLOW_EMPTY_PASSWORD: ${REDIS_ALLOW_EMPTY_PASSWORD:-yes}
+    volumes:
+      - redis_data:/data
+    networks:
+      - symfony
+
+  pgsql:
+    container_name: symfony-pgsql
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgsql_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-symfony}
+      POSTGRES_USER: ${POSTGRES_USER:-symfony}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-symfony}
+    networks:
+      - symfony
+
+  rabbitmq:
+    container_name: symfony-rabbitmq
+    image: rabbitmq:3.13-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq/
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-symfony}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-symfony}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_DEFAULT_VHOST:-/}
+    networks:
+      symfony:
+        ipv4_address: 192.168.219.20
+
+volumes:
+  rabbitmq_data:
+    driver: local
+  pgsql_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  symfony:
+    driver: bridge
+    enable_ipv6: false
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.219.0/24
