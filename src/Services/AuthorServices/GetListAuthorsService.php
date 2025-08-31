@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\AuthorServices;
 
 use App\Contracts\Services\AuthorServices\GetListAuthorsServiceContract;
 use App\Dto\Requests\AuthorListRequest;
 use App\Repository\AuthorRepository;
-use Exception;
 
 final readonly class GetListAuthorsService implements GetListAuthorsServiceContract
 {
@@ -14,7 +15,7 @@ final readonly class GetListAuthorsService implements GetListAuthorsServiceContr
     }
 
     /**
-     * @throws Exception
+     * @throws \Exception
      */
     public function handle(AuthorListRequest $authorListRequest): array
     {

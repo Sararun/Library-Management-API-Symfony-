@@ -1,11 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
+use App\Attributes\FilterableField;
+use App\Filters\ContainsFilter;
+use App\Filters\EqualsFilter;
 use App\Repository\AuthorRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-
 
 #[ORM\Entity(repositoryClass: AuthorRepository::class)]
 #[ORM\Table(name: 'authors')]
@@ -23,10 +27,15 @@ class Author
         min: 2,
         max: 255,
         minMessage: 'Publisher name must be at least {{ limit }} characters long',
-        maxMessage: 'Publisher name cannot be longer than {{ limit }} characters'
+        maxMessage: 'Publisher name cannot be longer than {{ limit }} characters',
+    )]
+    #[FilterableField(
+        allowedFilters: [
+            EqualsFilter::class,
+            ContainsFilter::class,
+        ],
     )]
     private ?string $name = null;
-
 
     #[ORM\Column(type: 'datetime_immutable')]
     private ?\DateTimeImmutable $createdAt = null;
@@ -52,6 +61,7 @@ class Author
     public function setName(string $name): self
     {
         $this->name = $name;
+
         return $this;
     }
 
