@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Attributes\FilterableField;
+use App\Attributes\SortableField;
 use App\Filters\ContainsFilter;
 use App\Filters\EqualsFilter;
 use App\Repository\AuthorRepository;
@@ -19,15 +20,21 @@ class Author
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    #[FilterableField(
+        allowedFilters: [
+            EqualsFilter::class,
+        ],
+    )]
+    #[SortableField]
     private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 255)]
-    #[Assert\NotBlank(message: 'Publisher name cannot be blank')]
+    #[Assert\NotBlank(message: 'Имя автора не может быть пустым')]
     #[Assert\Length(
         min: 2,
         max: 255,
-        minMessage: 'Publisher name must be at least {{ limit }} characters long',
-        maxMessage: 'Publisher name cannot be longer than {{ limit }} characters',
+        minMessage: 'Имя автор должно состоять как минимум из {{ limit }} символов.',
+        maxMessage: 'Название автора не может превышать {{ limit }} символов.',
     )]
     #[FilterableField(
         allowedFilters: [
@@ -35,6 +42,7 @@ class Author
             ContainsFilter::class,
         ],
     )]
+    #[SortableField]
     private ?string $name = null;
 
     #[ORM\Column(type: 'datetime_immutable')]

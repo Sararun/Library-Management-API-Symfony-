@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Dto\Requests;
 
 use App\Attributes\ValidEntityFilters;
+use App\Attributes\ValidEntitySort;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -21,28 +22,17 @@ abstract class AbstractFilterableListRequest
     public int $limit = 10;
 
     /**
-     * @var array<int, array{field: string, type: string, value: mixed}>
+     * @var array<int, FilterDto>
      */
-    #[Assert\All([
-        new Assert\Collection([
-            'fields' => [
-                'field' => [
-                    new Assert\Type('string'),
-                    new Assert\NotBlank(),
-                ],
-                'type' => [
-                    new Assert\Type('string'),
-                    new Assert\NotBlank(),
-                ],
-                'value' => [
-                    new Assert\NotNull(),
-                ],
-            ],
-            'allowExtraFields' => false,
-            'allowMissingFields' => false,
-        ]),
-    ])]
+    #[Assert\Valid]
     public array $filters = [];
+
+    public SortDto $sort;
+
+    public function __construct()
+    {
+        $this->sort = new SortDto();
+    }
 
     abstract public function getEntityClass(): string;
 
@@ -58,6 +48,21 @@ abstract class AbstractFilterableListRequest
         foreach ($violations as $violation) {
             $context->buildViolation($violation->getMessage())
                 ->atPath('filters' . $violation->getPropertyPath())
+                ->addViolation();
+        }
+    }
+
+    #[Assert\Callback]
+    public function validateSort(ExecutionContextInterface $context): void
+    {
+        $violations = $context->getValidator()->validate(
+            $this->sort,
+            new ValidEntitySort(entityClass: $this->getEntityClass())
+        );
+
+        foreach ($violations as $violation) {
+            $context->buildViolation($violation->getMessage())
+                ->atPath('sort')
                 ->addViolation();
         }
     }

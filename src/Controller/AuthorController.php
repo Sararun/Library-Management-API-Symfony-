@@ -18,9 +18,16 @@ final class AuthorController extends AbstractController
      * @throws \Exception
      */
     #[Route('', name: 'list', methods: ['GET'])]
-    public function list(#[MapQueryString] AuthorListRequest $request, GetListAuthorsServiceContract $authorsService): JsonResponse
-    {
-        $authors = $authorsService->handle($request);
+    public function list(
+        #[MapQueryString] AuthorListRequest $request,
+        GetListAuthorsServiceContract $authorsService
+    ): JsonResponse {
+        $authors = $authorsService->handle(
+            $request->page,
+            $request->limit,
+            $request->filters,
+            $request->sort
+        );
 
         return $this->json([
             'data' => $authors,
