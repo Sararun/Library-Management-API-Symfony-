@@ -6,6 +6,7 @@ namespace App\Validators;
 
 use App\Attributes\FilterableField;
 use App\Attributes\ValidEntityFilters;
+use App\Dto\Requests\FilterDto;
 use App\Filters\FilterRegistry;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -18,6 +19,12 @@ class ValidEntityFiltersValidator extends ConstraintValidator
     ) {
     }
 
+    /**
+     * @param mixed | array<int, FilterDto> $value
+     * @param Constraint $constraint
+     * @return void
+     * @throws \ReflectionException
+     */
     public function validate(mixed $value, Constraint $constraint): void
     {
         if (!$constraint instanceof ValidEntityFilters) {
@@ -31,16 +38,16 @@ class ValidEntityFiltersValidator extends ConstraintValidator
         $allowedFilters = $this->getAllowedFilters($constraint->entityClass);
 
         foreach ($value as $index => $filter) {
-            if (!isset($filter['field']) || !isset($filter['type'])) {
-                continue;
-            }
+           if (! $filter instanceof FilterDto) {
+               continue;
+           }
 
-            $field = $filter['field'];
-            $type = $filter['type'];
+            $field = $filter->field;
+            $type = $filter->type;
 
             // Проверяем, существует ли поле
             if (!isset($allowedFilters[$field])) {
-                $this->context->buildViolation('Field "{{ field }}" is not filterable')
+                $this->context->buildViolation('Поле "{{ field }}" не может использоваться в фильтрации')
                     ->setParameter('{{ field }}', $field)
                     ->atPath("[$index][field]")
                     ->addViolation();
@@ -50,7 +57,7 @@ class ValidEntityFiltersValidator extends ConstraintValidator
             // Проверяем, разрешён ли тип фильтра для поля
             $allowedTypes = $allowedFilters[$field];
             if (!\in_array($type, $allowedTypes)) {
-                $this->context->buildViolation('Filter type "{{ type }}" is not allowed for field "{{ field }}". Allowed types: {{ allowed }}')
+                $this->context->buildViolation('Фильтр типа "{{ type }}" не поддерживается для поля "{{ field }}". Поддерживается следующие: {{ allowed }}')
                     ->setParameter('{{ type }}', $type)
                     ->setParameter('{{ field }}', $field)
                     ->setParameter('{{ allowed }}', implode(', ', $allowedTypes))
@@ -87,7 +94,6 @@ class ValidEntityFiltersValidator extends ConstraintValidator
 
             $allowedFilters[$property->getName()] = $allowedTypes;
         }
-
         return $allowedFilters;
     }
 }

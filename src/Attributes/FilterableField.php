@@ -11,6 +11,7 @@ class FilterableField
 {
     /**
      * @param array<class-string<FilterContract>> $allowedFilters
+     * @param mixed[] $validationRules
      */
     public function __construct(
         public array $allowedFilters = [],
