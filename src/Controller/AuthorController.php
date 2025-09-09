@@ -8,6 +8,7 @@ use App\Contracts\Services\AuthorServices\GetListAuthorsServiceContract;
 use App\Dto\Requests\AuthorListRequest;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -19,7 +20,7 @@ final class AuthorController extends AbstractController
      */
     #[Route('', name: 'list', methods: ['GET'])]
     public function list(
-        #[MapQueryString] AuthorListRequest $request,
+        #[MapQueryString(validationFailedStatusCode: Response::HTTP_UNPROCESSABLE_ENTITY)] AuthorListRequest $request,
         GetListAuthorsServiceContract $authorsService
     ): JsonResponse {
         $authors = $authorsService->handle(
