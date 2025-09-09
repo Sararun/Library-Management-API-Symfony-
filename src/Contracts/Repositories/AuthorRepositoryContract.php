@@ -1,19 +1,17 @@
 <?php
 
-declare(strict_types=1);
-
-namespace App\Contracts\Services\AuthorServices;
+namespace App\Contracts\Repositories;
 
 use App\Dto\PaginatedEntities;
-use App\Dto\Requests\AuthorListRequest;
 use App\Dto\Requests\FilterDto;
 use App\Dto\Requests\SortDto;
 use App\Entity\Author;
 use Doctrine\Common\Collections\Order;
 
-interface GetListAuthorsServiceContract
+interface AuthorRepositoryContract
 {
     /**
+     *
      * @param int $page
      * @param int $limit
      * @param FilterDto[] $filters
@@ -21,7 +19,7 @@ interface GetListAuthorsServiceContract
      * @param string $sortOrder
      * @return PaginatedEntities<Author>
      */
-    public function handle(
+    public function getPaginatedAuthors(
         int $page,
         int $limit,
         array $filters,

@@ -16,6 +16,9 @@ services:
     App\:
         resource: '../src/'
 
+    App\Contracts\Repositories\AuthorRepositoryContract:
+        alias: App\Repository\AuthorRepository
+
     App\Contracts\Services\AuthorServices\GetListAuthorsServiceContract:
         alias: App\Services\AuthorServices\GetListAuthorsService
 

@@ -26,11 +26,24 @@ final class AuthorController extends AbstractController
             $request->page,
             $request->limit,
             $request->filters,
-            $request->sort
+            $request->sort->field,
+            $request->sort->order,
         );
 
         return $this->json([
-            'data' => $authors,
+            'data' => [
+                'items' => $authors->items,
+                'meta' => [
+                    'total' => $authors->total,
+                    'page' => $authors->page,
+                    'limit' => $authors->limit,
+                    'pages' => $authors->pages,
+                    'has_next_page' => $authors->hasNextPage(),
+                    'has_previous_page' => $authors->hasPreviousPage(),
+                    'from' => $authors->getFrom(),
+                    'to' => $authors->getTo(),
+                ],
+            ],
         ]);
     }
 }

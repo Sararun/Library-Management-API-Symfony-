@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Contracts\Repositories\AuthorRepositoryContract;
+use App\Dto\PaginatedEntities;
 use App\Dto\Requests\AuthorListRequest;
 use App\Dto\Requests\FilterDto;
 use App\Dto\Requests\SortDto;
@@ -18,29 +20,27 @@ use ReflectionException;
 /**
  * @extends ServiceEntityRepository<Author>
  */
-class AuthorRepository extends ServiceEntityRepository
+final class AuthorRepository extends ServiceEntityRepository implements AuthorRepositoryContract
 {
     public function __construct(
         ManagerRegistry $registry,
-        private FilterBuilder $filterBuilder,
+        private readonly FilterBuilder $filterBuilder,
     ) {
         parent::__construct($registry, Author::class);
     }
 
     /**
-     * @param int $page
-     * @param int $limit
-     * @param FilterDto[] $filters
-     * @param SortDto|null $sort
-     * @return array
-     * @throws ReflectionException
+     *
+     * @inheritDoc
+     * @throws \ReflectionException
      */
     public function getPaginatedAuthors(
         int $page,
         int $limit,
         array $filters,
-        ?SortDto $sort = null
-    ): array {
+        string $sortField = 'id',
+        string $sortOrder = Order::Ascending->value
+    ): PaginatedEntities {
         $qb = $this->createQueryBuilder('a');
 
         $this->filterBuilder->buildFilters(
@@ -50,22 +50,18 @@ class AuthorRepository extends ServiceEntityRepository
             'a',
         );
 
-        if ($sort) {
-            $qb->orderBy('a.' . $sort->field, $sort->order);
-        }
-
-        $qb->setFirstResult(($page - 1) * $limit)
+        $qb->orderBy('a.' . $sortField, $sortOrder)
+            ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit);
+
 
         $paginator = new Paginator($qb->getQuery());
 
-
-        return [
-            'items' => $paginator->getIterator(),
-            'total' => \count($paginator),
-            'page' => $page,
-            'limit' => $limit,
-            'pages' => ceil(\count($paginator) / $limit),
-        ];
+        return new PaginatedEntities(
+            items: iterator_to_array($paginator->getIterator()),
+            total: count($paginator),
+            page: $page,
+            limit: $limit,
+        );
     }
 }
