@@ -16,5 +16,19 @@ services:
     App\:
         resource: '../src/'
 
+    App\Contracts\Repositories\AuthorRepositoryContract:
+        alias: App\Repository\AuthorRepository
+
+    App\Contracts\Services\AuthorServices\GetListAuthorsServiceContract:
+        alias: App\Services\AuthorServices\GetListAuthorsService
+
+    _instanceof:
+        App\Contracts\FilterContract:
+            tags: [ 'app.filter' ]
+
+    App\Filters\FilterRegistry:
+        arguments:
+            - !tagged_iterator app.filter
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
